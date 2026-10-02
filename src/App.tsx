@@ -16,6 +16,8 @@ import NotFound from "./pages/NotFound";
 import About from "./pages/About";
 import Results from '@/pages/Results';
 import ProtectedRoute from "./components/ProtectedRoute";
+import UserProfile from "./components/UserProfile";
+import Appointments from "./components/Appointments";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +38,8 @@ const App = () => (
             <Route element={<ProtectedRoute />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/upload" element={<UploadReceipt />} />
+              <Route path="/profile" element={<UserProfile />} />
+              <Route path="/appointments" element={<Appointments />} />
             </Route>
             
             <Route path="/chat" element={<ChatAI />} />

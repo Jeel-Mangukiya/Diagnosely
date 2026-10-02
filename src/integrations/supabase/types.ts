@@ -46,6 +46,7 @@ export type Database = {
           created_at: string
           id: string
           sender: string
+          session_id: string | null
           user_id: string
         }
         Insert: {
@@ -53,6 +54,7 @@ export type Database = {
           created_at?: string
           id?: string
           sender: string
+          session_id?: string | null
           user_id: string
         }
         Update: {
@@ -60,9 +62,17 @@ export type Database = {
           created_at?: string
           id?: string
           sender?: string
+          session_id?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_session_id_fkey"
+            columns: ["session_id"]
+            referencedRelation: "chat_sessions"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       profiles: {
         Row: {

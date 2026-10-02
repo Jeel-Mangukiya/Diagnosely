@@ -9,8 +9,7 @@ async function migrateMessages() {
     // Get all users who have messages
     const { data: messages, error: messagesError } = await supabase
       .from('chat_messages')
-      .select('user_id')
-      .groupBy('user_id');
+      .select('user_id');
 
     if (messagesError) throw messagesError;
     if (!messages) {
@@ -18,7 +17,7 @@ async function migrateMessages() {
       return;
     }
 
-    const uniqueUserIds = messages.map(msg => msg.user_id);
+    const uniqueUserIds = Array.from(new Set(messages.map(msg => msg.user_id)));
 
     // For each user
     for (const user_id of uniqueUserIds) {

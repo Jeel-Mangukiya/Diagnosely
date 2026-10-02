@@ -36,20 +36,20 @@ const ContactUs = () => {
     {
       icon: Mail,
       title: 'Email Us',
-      content: 'jeelmangukiya2805@gmail.com',
+      content: 'jeel09896@gmail.com',
       description: 'We typically respond within 24 hours',
     },
     {
       icon: Phone,
       title: 'Call Us',
       content: '+91 95586 38795 ',
-      description: 'Mon-Fri 9AM-6PM EST',
+      description: 'Mon-Fri 9AM-6PM IST',
     },
     {
       icon: MapPin,
       title: 'Visit Us',
-      content: 'Bhavnagar',
-      description: 'Gujarat 364320',
+      content: 'Ahmedabad',
+      description: 'Gujarat 380001',
     },
     {
       icon: Clock,
@@ -121,7 +121,7 @@ const ContactUs = () => {
                           id="name"
                           name="name"
                           required
-                          placeholder="Jeel Mangukiya"
+                          placeholder="enter your name"
                           value={formData.name}
                           onChange={handleChange}
                           className="rounded-xl border-gray-200 focus:border-primary focus:ring-primary h-12"
@@ -136,7 +136,7 @@ const ContactUs = () => {
                           name="email"
                           type="email"
                           required
-                          placeholder="jeelmangukiya@example.com"
+                          placeholder="email@example.com"
                           value={formData.email}
                           onChange={handleChange}
                           className="rounded-xl border-gray-200 focus:border-primary focus:ring-primary h-12"

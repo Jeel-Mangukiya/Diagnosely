@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,6 +8,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Activity, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -22,32 +23,85 @@ const SignIn = () => {
   const navigate = useNavigate();
 
   // Redirect if already authenticated
-  if (user) {
-    navigate('/');
-    return null;
-  }
+  useEffect(() => {
+    if (user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
+
+  const handleGoogleLogin = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`
+        }
+      });
+
+      if (error) {
+        console.error('Google login error:', error);
+        toast({
+          title: "Google Sign In Error",
+          description: error.message || "Failed to sign in with Google.",
+          variant: "destructive",
+        });
+      }
+    } catch (err: any) {
+      console.error('Google sign in error:', err);
+    }
+  };
+
+  const handleFacebookLogin = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`
+        }
+      });
+
+      if (error) {
+        console.error('Facebook login error:', error);
+        toast({
+          title: "Facebook Sign In Error",
+          description: error.message || "Failed to sign in with Facebook.",
+          variant: "destructive",
+        });
+      }
+    } catch (err: any) {
+      console.error('Facebook sign in error:', err);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    const { error } = await signIn(formData.email, formData.password);
-    
-    if (error) {
+    try {
+      const { error } = await signIn(formData.email, formData.password);
+      
+      if (error) {
+        toast({
+          title: "Sign In Failed",
+          description: error.message || "Invalid credentials or network issue.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Welcome back!",
+          description: "You have successfully signed in.",
+        });
+        navigate('/');
+      }
+    } catch (err: any) {
       toast({
-        title: "Sign In Failed",
-        description: error.message,
+        title: "Sign In Error",
+        description: err?.message || "An error occurred during sign in.",
         variant: "destructive",
       });
-    } else {
-      toast({
-        title: "Welcome back!",
-        description: "You have successfully signed in.",
-      });
-      navigate('/');
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -153,13 +207,13 @@ const SignIn = () => {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <Button variant="outline" className="rounded-xl h-12 border-gray-200">
+              <Button onClick={handleGoogleLogin} variant="outline" className="rounded-xl h-12 border-gray-200">
                 <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
                   <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                 </svg>
                 Google
               </Button>
-              <Button variant="outline" className="rounded-xl h-12 border-gray-200">
+              <Button onClick={handleFacebookLogin} variant="outline" className="rounded-xl h-12 border-gray-200">
                 <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                 </svg>

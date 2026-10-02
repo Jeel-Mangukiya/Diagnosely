@@ -147,8 +147,8 @@ For detailed documentation about each feature:
 For support, please:
 - Open an issue in the GitHub repository
 - Contact us through the application's contact form
-- Email us at meetvaghani1238@gmail.com
+- Email us at jeel09896@gmail.com
 
 ---
 
-Made with ❤️ by the Meet Vaghani
+Made with ❤️ by the Jeel Mangukiya

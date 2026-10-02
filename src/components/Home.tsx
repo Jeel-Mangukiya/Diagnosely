@@ -2,8 +2,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { Activity, Upload, MessageSquare, Shield, Star, CheckCircle } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Home = () => {
+  const { user } = useAuth();
   const features = [
     {
       icon: Upload,
@@ -45,7 +47,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      
+
       {/* Hero Section */}
       <section className="pt-40 pb-24 px-8 md:px-12">
         <div className="max-w-6xl mx-auto text-center">
@@ -58,9 +60,9 @@ const Home = () => {
               Upload medical receipts, get instant AI analysis, and chat with our intelligent system for personalized healthcare guidance.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center pt-4">
-              <Link to="/signup" className="w-full sm:w-auto">
+              <Link to={user ? "/dashboard" : "/signup"} className="w-full sm:w-auto">
                 <Button size="lg" className="rounded-xl px-8 py-5 sm:px-10 sm:py-6 text-base sm:text-lg bg-primary hover:bg-primary/90 shadow-lg animate-float w-full">
-                  Get Started Free
+                  {user ? "Go to Dashboard" : "Get Started Free"}
                 </Button>
               </Link>
               <Link to="/chat" className="w-full sm:w-auto">
@@ -151,7 +153,7 @@ const Home = () => {
                 Empowering healthcare decisions through AI-powered medical assistance and analysis.
               </p>
             </div>
-            
+
             <div>
               <h3 className="text-sm font-semibold mb-3 text-foreground">Product</h3>
               <ul className="space-y-1.5 text-sm">
@@ -160,7 +162,7 @@ const Home = () => {
                 <li><Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">Dashboard</Link></li>
               </ul>
             </div>
-            
+
             <div>
               <h3 className="text-sm font-semibold mb-3 text-foreground">Company</h3>
               <ul className="space-y-1.5 text-sm">
@@ -169,7 +171,7 @@ const Home = () => {
                 <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</a></li>
               </ul>
             </div>
-            
+
             <div>
               <h3 className="text-sm font-semibold mb-3 text-foreground">Support</h3>
               <ul className="space-y-1.5 text-sm">
@@ -179,7 +181,7 @@ const Home = () => {
               </ul>
             </div>
           </div>
-          
+
           <div className="border-t border-border mt-8 pt-6 text-center">
             <p className="text-xs text-muted-foreground">&copy; 2025 Diagnosely. All rights reserved. Built with care for better healthcare.</p>
           </div>
