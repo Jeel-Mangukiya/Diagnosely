@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Upload, FileText, CheckCircle, X, Camera, Image, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { analyzeDocument } from '@/services/documentAnalysis';
+import { analyzeDocumentsWithBackend } from '@/services/documentAnalysis';
 import { AnalysisResult } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { DocumentStorageService } from '@/services/documentStorageService';
@@ -59,55 +59,40 @@ export const UploadReceipt: React.FC = () => {
       return;
     }
 
+    const fileList = Array.from(files);
     setUploading(true);
     setError('');
     setProgress(0);
 
     try {
-      const results: AnalysisResult[] = [];
+      updateProgress('Preparing documents for upload...', 15);
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      updateProgress('Sending documents to backend server for AI analysis...', 40);
+      const results = await analyzeDocumentsWithBackend(fileList);
+
+      updateProgress('Storing analysis results...', 80);
       const fileNames: string[] = [];
 
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        
+      for (let i = 0; i < results.length; i++) {
+        const result = results[i];
+        const fileName = result.fileName || fileList[i]?.name || 'Medical Document';
+        fileNames.push(fileName);
+
         try {
-          // Reading file
-          updateProgress(`Reading ${file.name}...`, 10);
-          const arrayBuffer = await file.arrayBuffer();
-          await new Promise(resolve => setTimeout(resolve, 500));
-          
-          // Extracting text
-          updateProgress(`Extracting text from ${file.name}...`, 30);
-          await new Promise(resolve => setTimeout(resolve, 500));
-          const result = await analyzeDocument(file.name, arrayBuffer);
-          
-          // Store analysis in database
-          updateProgress(`Storing analysis for ${file.name}...`, 60);
-          try {
-            await documentStorage.saveAnalysis(user.id, file.name, result);
-          } catch (storageError) {
-            throw new Error(`Failed to store analysis: ${storageError instanceof Error ? storageError.message : 'Unknown error'}`);
-          }
-          
-          results.push(result);
-          fileNames.push(file.name);
-          
-          // Update progress based on number of files
-          if (files.length > 1) {
-            updateProgress(`Completed ${i + 1} of ${files.length} files`, (i + 1) / files.length * 100);
-          } else {
-            updateProgress('Analysis complete!', 100);
-          }
-        } catch (error) {
-          setError(`Error processing ${file.name}: ${error instanceof Error ? error.message : 'Unknown error'}`);
-          return;
+          await documentStorage.saveAnalysis(user.id, fileName, result);
+        } catch (storageError) {
+          console.warn('Error storing analysis in database:', storageError);
         }
       }
+
+      updateProgress('Analysis complete!', 100);
+      await new Promise(resolve => setTimeout(resolve, 300));
 
       // Navigate to results page with the analysis results
       navigate('/results', { state: { results, fileNames } });
     } catch (error) {
-      setError(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setError(error instanceof Error ? error.message : 'An error occurred during analysis');
     } finally {
       setUploading(false);
     }
