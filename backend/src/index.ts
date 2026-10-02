@@ -1,11 +1,17 @@
 import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
-import path from 'path';
-import { analyzeDocument } from './services/documentAnalysis';
+import fs from 'fs/promises';
+import { existsSync, mkdirSync } from 'fs';
+import { analyzeDocument } from './services/documentAnalysis.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
+
+// Ensure uploads directory exists
+if (!existsSync('uploads')) {
+  mkdirSync('uploads', { recursive: true });
+}
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -39,6 +45,13 @@ const upload = multer({
 app.use(cors());
 app.use(express.json());
 
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    service: 'Diagnosely Backend'
+  });
+});
+
 // Routes
 app.post('/api/analyze-documents', upload.array('files'), async (req, res) => {
   try {
@@ -48,12 +61,15 @@ app.post('/api/analyze-documents', upload.array('files'), async (req, res) => {
 
     const files = req.files as Express.Multer.File[];
     const analysisResults = await Promise.all(
-      files.map(file => analyzeDocument(file.path))
+      files.map(async (file) => {
+        const fileBuffer = await fs.readFile(file.path);
+        return analyzeDocument(file.originalname, fileBuffer);
+      })
     );
 
     const analysisId = Date.now().toString();
     // TODO: Store analysis results in database
-    
+
     res.json({
       analysisId,
       message: 'Documents analyzed successfully',
@@ -74,6 +90,6 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 });
 
 // Start server
-app.listen(port, () => {
-  // Server is running
-}); 
+app.listen(Number(port), '0.0.0.0', () => {
+  console.log(`Backend running on port ${port}`);
+});
